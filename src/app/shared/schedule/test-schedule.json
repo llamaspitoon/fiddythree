@@ -1,0 +1,67 @@
+{
+	"games": [
+		{
+			"awayTeam": "Eagles",
+			"homeTeam": "Browns"
+		},
+		{
+			"awayTeam": "Giants",
+			"homeTeam": "Jets"
+		},
+		{
+			"awayTeam": "Broncos",
+			"homeTeam": "Redskins"
+		},
+		{
+			"awayTeam": "Patriots",
+			"homeTeam": "Panthers"
+		},
+		{
+			"awayTeam": "Seahawks",
+			"homeTeam": "Vikings"
+		},
+		{
+			"awayTeam": "Lions",
+			"homeTeam": "Buccaneers"
+		},
+		{
+			"awayTeam": "Packers",
+			"homeTeam": "Raiders"
+		},
+		{
+			"awayTeam": "Chiefs",
+			"homeTeam": "Bears"
+		},{
+			"awayTeam": "Texans",
+			"homeTeam": "Rams"
+		},
+		{
+			"awayTeam": "Titans",
+			"homeTeam": "Steelers"
+		},
+		{
+			"awayTeam": "49ers",
+			"homeTeam": "Colts"
+		},
+		{
+			"awayTeam": "Ravens",
+			"homeTeam": "Dolphins"
+		},
+		{
+			"awayTeam": "Falcons",
+			"homeTeam": "Jaguars"
+		},
+		{
+			"awayTeam": "Saints",
+			"homeTeam": "Chargers"
+		},
+		{
+			"awayTeam": "Bengals",
+			"homeTeam": "Bills"
+		},
+		{
+			"awayTeam": "Cardinals",
+			"homeTeam": "Cowboys"
+		}
+	]
+}
