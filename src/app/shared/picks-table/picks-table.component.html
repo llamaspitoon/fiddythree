@@ -1,0 +1,51 @@
+<ng-container [formGroup]="picksGroup">
+	<div class="row">
+		<div class="col">
+			<h6>Week {{weekNumber}}</h6>
+			<table class="table"
+				formArrayName="picksControls">
+				<tbody>
+					<tr *ngFor="let picksControl of picksControls.controls; let i=index">
+						<td>
+							<mat-radio-group [formControlName]="i"
+								required>
+								<mat-radio-button [value]="games[i].away.team.team_id">
+									{{games[i].away.team.name}} ({{games[i].away.team.team_id}}) at
+								</mat-radio-button>
+								<mat-radio-button [value]="games[i].home.team.team_id"
+									class="ml-2">
+									{{games[i].home.team.name}} ({{games[i].home.team.team_id}})
+								</mat-radio-button>
+								<mat-radio-button [value]="games[i].away.team.team_id.toString() + games[i].home.team.team_id.toString()"
+									class="ml-2">
+									tie
+								</mat-radio-button>
+							</mat-radio-group>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+	<div class="row align-items-center">
+		<div class="col d-inline-flex align-items-center">
+			Total score of the Monday Night game (both teams):
+			<mat-form-field class="ml-3 monday-score-input">
+				<input matInput
+					formControlName="mondayScore"
+					type="number"
+					min="0"
+                    required>
+                <mat-error *ngIf="picksGroup.get('mondayScore').invalid && picksGroup.touched">
+                    Need a score here
+                </mat-error>
+			</mat-form-field>
+			<button mat-raised-button
+				color="primary"
+				class="ml-3"
+				(click)="mapFormToPicksEntry()">
+				Submit Picks
+			</button>
+		</div>
+	</div>
+</ng-container>

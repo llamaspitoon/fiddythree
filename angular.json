@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "angular-truffle-box": {
+    "fiddy-fiddy": {
       "root": "",
       "sourceRoot": "src",
       "projectType": "application",
@@ -48,18 +48,18 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "angular-truffle-box:build"
+            "browserTarget": "fiddy-fiddy:build"
           },
           "configurations": {
             "production": {
-              "browserTarget": "angular-truffle-box:build:production"
+              "browserTarget": "fiddy-fiddy:build:production"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "angular-truffle-box:build"
+            "browserTarget": "fiddy-fiddy:build"
           }
         },
         "test": {
@@ -91,7 +91,7 @@
         }
       }
     },
-    "angular-truffle-box-e2e": {
+    "fiddy-fiddy-e2e": {
       "root": "e2e",
       "sourceRoot": "e2e",
       "projectType": "application",
@@ -100,7 +100,7 @@
           "builder": "@angular-devkit/build-angular:protractor",
           "options": {
             "protractorConfig": "./protractor.conf.js",
-            "devServerTarget": "angular-truffle-box:serve"
+            "devServerTarget": "fiddy-fiddy:serve"
           }
         },
         "lint": {
@@ -115,7 +115,7 @@
       }
     }
   },
-  "defaultProject": "angular-truffle-box",
+  "defaultProject": "fiddy-fiddy",
   "schematics": {
     "@schematics/angular:component": {
       "prefix": "app",

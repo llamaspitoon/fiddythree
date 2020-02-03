@@ -1,0 +1,203 @@
+<div class="py-3">
+	<mat-card *ngIf="config">
+		<h4>Admin</h4>
+		<form [formGroup]="adminForm">
+			<div class="row">
+				<div class="col-lg-4 col-md-6">
+					<mat-form-field>
+						<mat-select
+							formControlName="weekNumber"
+							placeholder="Week #"
+							[value]="adminForm.get('weekNumber').value">
+							<mat-option
+								*ngFor="let weekNumber of weekNumbers"
+								[value]="weekNumber">
+								{{weekNumber}}
+							</mat-option>
+						</mat-select>
+					</mat-form-field>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-lg-4 col-md-6">
+					<mat-checkbox
+						formControlName="contractLocked"
+						[checked]="adminForm.get('contractLocked').value">
+						Lock Contract
+					</mat-checkbox>
+				</div>
+            </div>
+            <div class="row">
+                <div class="col-lg-4 col-md-6">
+                    <mat-form-field>
+                        <input matInput
+                            readonly
+                            type="text"
+                            placeholder="Admin"
+                            formControlName="admin"
+                            [value]="adminForm.get('admin').value">
+                    </mat-form-field>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-4 col-md-6">
+                    <mat-form-field>
+                        <input matInput
+                            type="text"
+                            placeholder="Stakeholder"
+                            formControlName="stakeholder"
+                            [value]="adminForm.get('stakeholder').value">
+                    </mat-form-field>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-4 col-md-6">
+                    <mat-form-field>
+                        <input matInput
+                            type="text"
+                            placeholder="Founder"
+                            formControlName="founder"
+                            [value]="adminForm.get('founder').value">
+                    </mat-form-field>
+                </div>
+            </div>
+			<mat-divider></mat-divider>
+			<div class="row mt-4">
+				<div class="col"
+					*ngIf="!configItemList">
+					<button
+						mat-raised-button
+						color="primary"
+						(click)="listConfigItems()">
+						<mat-icon>build</mat-icon>
+						Set Config
+					</button>
+				</div>
+				<div class="col"
+					*ngIf="configItemList">
+					<ul>
+						<li *ngFor="let item of configItemList">
+							{{item.label}}: <b>{{item.value}}</b>
+						</li>
+					</ul>
+					<p>Are you sure?</p>
+					<div>
+						<button
+							mat-raised-button
+							class="mr-2"
+							color="primary"
+							(click)="setAppConfig()">
+							<mat-icon>done</mat-icon>
+							Yes, Save It
+						</button>
+						<button
+							mat-raised-button
+							color="warn"
+							(click)="clearConfigItemsList()">
+							<mat-icon>clear</mat-icon>
+							No, Don't Save It
+						</button>
+					</div>
+				</div>
+			</div>
+			<div class="row mt-3" *ngIf="config.contractLocked && weeklySchedule">
+				<div class="col">
+					<mat-checkbox
+						(change)="toggleFinalScoresTable($event)">
+						Set Final Scores?
+					</mat-checkbox>
+				</div>
+			</div>
+			<div class="row" *ngIf="showFinalScoresTable">
+				<div class="col">
+					<app-scores-table
+						[weekNumber]="config.weekNumber"
+						[games]="weeklySchedule.games"
+						(submitScoresRequest)="updateScheduleWithScores($event)">
+					</app-scores-table>
+				</div>
+			</div>
+			<div class="row" *ngIf="config.contractLocked && weeklySchedule">
+				<div class="col">
+					<mat-checkbox
+						(change)="toggleMasterKeyTable($event)">
+						Set Master Key?
+					</mat-checkbox>
+                </div>
+			</div>
+			<div class="row" *ngIf="showMasterKeyTable">
+				<div *ngIf="!masterKey" class="col">
+					<app-picks-table
+						[weekNumber]="config.weekNumber"
+						[games]="weeklySchedule.games"
+						(submitPicksRequest)="setMasterKey($event)">
+					</app-picks-table>
+				</div>
+				<p *ngIf="masterKey" class="col">
+					Master Key for week {{config.weekNumber}} is set.
+				</p>
+            </div>
+            <ng-container *ngIf="masterKey">
+                <div class="row">
+                    <div class="col">
+						<p>Choose a Game Type to Determine It's Winner:</p>
+						<mat-radio-group
+							class="ff-game-type-group"
+							(change)="determineWinnersOfGameType($event.value)">
+							<mat-radio-button
+								class="ff-game-type-group__item"
+								[value]="gameTypes.Fun">
+								Fun
+							</mat-radio-button>
+							<mat-radio-button
+								class="ff-game-type-group__item"
+								[value]="gameTypes.Funner">
+								Funner
+							</mat-radio-button>
+							<mat-radio-button
+								class="ff-game-type-group__item"
+								[value]="gameTypes.Baller">
+								Baller
+							</mat-radio-button>
+						</mat-radio-group>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <table class="table" *ngIf="winningEntries.length">
+                            <thead>
+                                <tr>
+									<th>Week Number</th>
+                                    <th>Game Type</th>
+                                    <th>Player</th>
+                                    <th>Picks</th>
+                                    <th># Correct</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let entry of winningEntries">
+									<td>{{entry.weekNumber}}</td>
+									<td>{{entry.gameType}}</td>
+                                    <td>{{entry.player.substring(0,6)}}</td>
+                                    <td>{{entry.evm_picks.toString()}}</td>
+                                    <td>{{entry.numberCorrect}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </ng-container>
+            <div class="row" *ngIf="winningEntries.length && winningEntriesAdded === winningEntries.length">
+                <div class="col">
+                    <button
+                        mat-raised-button
+                        color="primary"
+                        (click)="payoutEarnings()">
+                        <mat-icon>account_balance</mat-icon>
+                        Payout Earnings
+                    </button>
+                </div>
+            </div>
+		</form>
+	</mat-card>
+</div>
