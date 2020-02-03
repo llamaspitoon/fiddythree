@@ -1,0 +1,45 @@
+<div class="py-3">
+	<mat-card *ngIf="config">
+		<h4>What's up, {{greeting}}!!!</h4>
+        <h5 *ngIf="address" class="mb-2">Dude, that's a long name!!!</h5>
+        <div *ngIf="!config.contractLocked" class="row">
+            <div class="col">
+                <div>Pick your game type before submitting your picks.</div>
+                <div class="ff-button-row mb-4">
+                    <mat-button-toggle-group
+                        class="ff-game-type-toggle"
+                        (change)="setGameTypeData($event.value)">
+                        <mat-button-toggle [value]="gameTypes.Fun">
+                            <mat-icon>account_balance</mat-icon>
+                            Fun (0.05 ETH)
+                        </mat-button-toggle>
+                        <mat-button-toggle [value]="gameTypes.Funner">
+                            <mat-icon>account_balance</mat-icon>
+                            Funner (0.2 ETH)
+                        </mat-button-toggle>
+                        <mat-button-toggle [value]="gameTypes.Baller">
+                            <mat-icon>account_balance</mat-icon>
+                            Baller (1 ETH)
+                        </mat-button-toggle>
+                    </mat-button-toggle-group>
+                </div>
+            </div>
+        </div>
+		<div class="row" *ngIf="games && !config.contractLocked; else contractLocked">
+			<div class="col">
+				<app-picks-table
+					[weekNumber]="config.weekNumber"
+					[games]="games"
+					(submitPicksRequest)="postPicksToBlockchain($event)">
+				</app-picks-table>
+			</div>
+        </div>
+        <ng-template #contractLocked>
+            <div class="row">
+                <div class="col">
+                    Sorry, homey, but the contract is locked for the remainder of Week {{config?.weekNumber}}. Come back Tuesday morning to submit your picks for Week {{config?.weekNumber + 1}}.
+                </div>
+            </div>
+        </ng-template>
+	</mat-card>
+</div>

@@ -1,0 +1,37 @@
+<ng-container [formGroup]="scoresGroup">
+	<div class="row">
+		<div class="col">
+			<h6>Week {{weekNumber}}</h6>
+			<table class="table"
+				formArrayName="scoresControls">
+				<tbody>
+					<tr *ngFor="let gameScoreGroup of scoresControls.controls; let i=index">
+						<td [formGroupName]="i">
+							<mat-form-field class="mr-2 ff-scores-input">
+								<input type="number" matInput
+									(keyup)="addScoreToControl(i, 'away', $event.target.value)"
+									required>
+							</mat-form-field>
+							{{games[i].away.team.name}} at {{games[i].home.team.name}}
+							<mat-form-field class="ml-2 ff-scores-input">
+								<input type="number" matInput
+									(keyup)="addScoreToControl(i, 'home', $event.target.value)"
+									required>
+							</mat-form-field>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col text-right">
+			<button mat-raised-button
+				color="primary"
+				class="ml-3"
+				(click)="mapFormToScoresEntry()">
+				Submit Scores
+			</button>
+		</div>
+	</div>
+</ng-container>
