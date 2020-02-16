@@ -17,36 +17,35 @@ import { IWinningEntry } from '../picks/picks-entry.js';
 	providedIn: 'root'
 })
 export class ContractService {
-	private _fiddyFiddy: any = TruffleContract(tokenAbi);
+	private _fiddyFiddy: any;
 	private _userAccount: string;
 
 	constructor(private _snackBar: MatSnackBar) {
-		// If no web3 instance, then direct user to turn on or install MetaMask
-		if (typeof window.web3 === 'undefined') {
-			this.displayError('You do not have an ethereum provider enabled. You could try MetaMask if you do not have a wallet provider.');
-		}
-
-		window.web3 = window.ethereum
-			? new Web3(window.ethereum)
-			: new Web3(window.web3.currentProvider);
-
-		this._fiddyFiddy.setProvider(window.web3.currentProvider);
-
-		// If window.ethereum, then the MetaMask "Privacy Mode" is enabled
-		if (window.ethereum) {
-			this.enableAccessToProvider(window.ethereum);
-		} else {
-			this._userAccount = window.web3.eth.accounts[0];
-		}
+		this._fiddyFiddy = TruffleContract(tokenAbi);
 	}
 
-	async enableAccessToProvider(ethereum: any) {
-		try {
-			await ethereum.enable();
-			this._userAccount = window.web3.eth.accounts[0];
-		} catch {
-			this.displayError('You cannot play if you do not allow FiddyFiddy to interact with your address.');
-		}
+	getContract(): Promise<void> {
+		return new Promise((resolve, reject) => {
+			// If no web3 instance, then direct user to turn on or install MetaMask
+			if (typeof window.ethereum === 'undefined') {
+				window.web3 = new Web3(new Web3.providers.HttpProvider(`http://localhost:7545`));
+				this._userAccount = window.web3.eth.accounts[0];
+
+				this.displayError('You do not have an ethereum provider enabled. You could try MetaMask if you do not have a wallet provider.');
+				return resolve();
+			} else {
+				window.ethereum.enable(window.ethereum)
+					.then(() => {
+						window.web3 = new Web3(window.ethereum);
+						this._userAccount = window.web3.eth.accounts[0];
+						return resolve();
+					})
+					.catch((error: any) => {
+						this.displayError('You cannot play if you do not allow FiddyFiddy to interact with your address.');
+						return reject();
+					});
+			}
+		});
 	}
 
 	getUserInfo(): Promise<{}> {

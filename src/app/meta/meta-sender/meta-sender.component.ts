@@ -8,7 +8,7 @@ const metacoin_artifacts = require('../../../../build/contracts/MetaCoin.json');
 @Component({
 	selector: 'app-meta-sender',
 	templateUrl: './meta-sender.component.html',
-	styleUrls: ['./meta-sender.component.css']
+	styleUrls: ['./meta-sender.component.scss']
 })
 export class MetaSenderComponent implements OnInit {
 	accounts: string[];

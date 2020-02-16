@@ -19,6 +19,8 @@ import { AppConfig } from '../shared/app-config/app-config';
 	styleUrls: ['./admin.component.scss']
 })
 export class AdminComponent implements OnInit, OnDestroy {
+	contractReady = false;
+	contractReadyMsg = 'Getting FiddyFiddy ready...';
 	adminForm: FormGroup;
 	config: AppConfig;
 	configItemList: ConfigItem[];
@@ -47,8 +49,14 @@ export class AdminComponent implements OnInit, OnDestroy {
 	}
 
 	ngOnInit() {
-		this.setWeekNumbers();
-		this.getAppConfig();
+		this._contractService.getContract()
+			.then(() => {
+				this.setWeekNumbers();
+				this.getAppConfig();
+			})
+			.catch(() => {
+				this.contractReadyMsg = 'Ruh roh... FiddyFiddy failed.';
+			});
 	}
 
 	ngOnDestroy() {

@@ -1,3 +1,8 @@
+pragma solidity ^0.5.0;
+
+import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
+import "openzeppelin-solidity/contracts/math/SafeMath.sol";
+
 /********************
     This is the FiddyFiddy contract for v1. It is rather centralized in that only the contract
     owner (called admin here) can, and must, set several properties including some that must changed
@@ -22,12 +27,6 @@
     and populate the game schedule manually until a third-party API provider is secured, at which point
     it is the contract owner's responsibility to activate an account with that provider.
  */
-
-pragma solidity ^0.5.0;
-
-import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
-import "openzeppelin-solidity/contracts/math/SafeMath.sol";
-
 
 contract FiddyFiddy is Ownable {
     using SafeMath for uint8;
