@@ -6,11 +6,14 @@
     "fiddy-fiddy": {
       "root": "",
       "sourceRoot": "src",
-      "projectType": "application",
-      "targets": {
+	  "projectType": "application",
+	  "prefix": "app",
+	  "schematics":{},
+      "architect": {
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
+			"aot": true,
             "outputPath": "dist",
             "index": "src/index.html",
             "main": "src/main.ts",
@@ -27,6 +30,12 @@
           },
           "configurations": {
             "production": {
+			  "budgets": [
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "6kb"
+                }
+              ],
               "optimization": true,
               "outputHashing": "all",
               "sourceMap": false,
@@ -126,6 +135,6 @@
     }
   },
   "cli": {
-    "analytics": "70345329-f899-4a5b-8783-79d2a3b91860"
+    "analytics": true
   }
 }

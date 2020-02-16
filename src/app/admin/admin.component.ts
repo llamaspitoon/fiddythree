@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ContractService } from '../shared/contract/contract.service';
-import { MatSnackBar, MatCheckboxChange } from '@angular/material';
+import { MatCheckboxChange } from '@angular/material/checkbox';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { ConfigItem } from '../shared/app-config/config-item';
 import { IGame } from '../shared/game/game';
