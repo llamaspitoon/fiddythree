@@ -4,19 +4,19 @@ import { NgModule } from '@angular/core';
 const routes: Routes = [
 	{
 		path: 'make-picks',
-		loadChildren: './players-picks/players-picks.module#PlayersPicksModule'
+		loadChildren: () => import('./players-picks/players-picks.module').then(m => m.PlayersPicksModule)
 	},
 	{
 		path: 'view-entries',
-		loadChildren: './view-entries/view-entries.module#ViewEntriesModule'
+		loadChildren: () => import('./view-entries/view-entries.module').then(m => m.ViewEntriesModule)
 	},
 	{
 		path: 'admin',
-		loadChildren: './admin/admin.module#AdminModule'
+		loadChildren: () => import('./admin/admin.module').then(m => m.AdminModule)
 	},
 	{
 		path: '',
-		loadChildren: './read-me/read-me.module#ReadMeModule'
+		loadChildren: () => import('./read-me/read-me.module').then(m => m.ReadMeModule)
 	}
 ];
 

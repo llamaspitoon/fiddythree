@@ -2,7 +2,7 @@ import { GameType, GameTypeData } from '../shared/game-type/game-type';
 import { Component, OnInit } from '@angular/core';
 import { ScheduleService } from '../shared/schedule/schedule.service';
 import { IGame } from '../shared/game/game';
-import { MatSnackBar } from '@angular/material';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { ContractService } from '../shared/contract/contract.service';
 import { AppConfig } from '../shared/app-config/app-config';
 import { PickService } from '../shared/picks/pick.service';

@@ -1,11 +1,12 @@
 import { GameType } from './../game-type/game-type';
-import { MatSnackBar } from '@angular/material';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { Injectable } from '@angular/core';
-import * as Web3 from 'web3';
-import * as TruffleContract from 'truffle-contract';
 
 declare let require: any;
 declare let window: any;
+
+const Web3 = require('web3');
+const TruffleContract = require('@truffle/contract');
 
 import * as tokenAbi from '../../../../build/contracts/FiddyFiddy.json';
 import { AppConfig } from '@app/shared/app-config/app-config';
