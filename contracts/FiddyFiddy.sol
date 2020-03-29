@@ -1,3 +1,8 @@
+pragma solidity ^0.5.0;
+
+import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
+import "openzeppelin-solidity/contracts/math/SafeMath.sol";
+
 /********************
     This is the FiddyFiddy contract for v1. It is rather centralized in that only the contract
     owner (called admin here) can, and must, set several properties including some that must changed
@@ -22,12 +27,6 @@
     and populate the game schedule manually until a third-party API provider is secured, at which point
     it is the contract owner's responsibility to activate an account with that provider.
  */
-
-pragma solidity ^0.5.0;
-
-import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
-import "openzeppelin-solidity/contracts/math/SafeMath.sol";
-
 
 contract FiddyFiddy is Ownable {
     using SafeMath for uint8;
@@ -85,7 +84,7 @@ contract FiddyFiddy is Ownable {
      *****************************/
 
     modifier isContractUnlocked() {
-        require(!config.contractLocked);
+        require(!config.contractLocked, 'Contract is locked from receiving new entries');
         _;
     }
 
@@ -200,7 +199,7 @@ contract FiddyFiddy is Ownable {
 	{
         uint256 thisGameTypePayout = winningsVault[_weekNumber][_gameType];
 
-        require(thisGameTypePayout < address(this).balance);
+        require(thisGameTypePayout < address(this).balance, 'There is not enough ether to payout the winner, Ruh roh!');
         uint256 onePercentShare = thisGameTypePayout.div(100);
         uint256 fourPercentShare = onePercentShare.mul(4);
         uint256 ninetyFourPercentShare = onePercentShare.mul(94);
@@ -301,7 +300,7 @@ contract FiddyFiddy is Ownable {
         doesMatchEntryPrice(entryPrice)
     {
 		require(_weekNumber == config.weekNumber, "Our week number doesn't match up. Are you sure?");
-        require(isAdmitted[_player] = true);
+        require(isAdmitted[_player] = true, 'You have not paid admission');
 
 		entries[_weekNumber][_gameTypeIndex][_player].push(_picks);
 		uint256 numPlayerEntries = entries[_weekNumber][_gameTypeIndex][_player].length;

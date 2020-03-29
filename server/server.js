@@ -18,7 +18,17 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
-mongoose.connect(config.db);
+mongoose.connect(config.db, {
+	useNewUrlParser: true,
+	useUnifiedTopology: true
+})
+.then(function() {
+	console.log('MongoDB connected.')
+})
+.catch(function(error) {
+	console.error('MongoDB not connecting. ' + error);
+});
+
 var db = mongoose.connection;
 db.on('error', function() {
 	console.error('MongoDB connection error');
@@ -28,11 +38,11 @@ db.once('open', function () {
 });
 
 // point to /dist to deliver the angular app
-app.use(express.static(path.join(__dirname, '../dist/fiddy-fiddy')));
+app.use(express.static(path.join(__dirname, '../dist')));
 app.use('/api/schedule', scheduleRouter);
 app.use('/api/picks', picksRouter);
 app.get('*', function(req, res) {
-	res.sendFile(path.join(__dirname, '../dist/fiddy-fiddy/index.html'));
+	res.sendFile(path.join(__dirname, '../dist/index.html'));
 });
 
 // catch 404 and forward to error handler

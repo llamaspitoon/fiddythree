@@ -19,6 +19,8 @@ import { AppConfig } from '../shared/app-config/app-config';
 	styleUrls: ['./admin.component.scss']
 })
 export class AdminComponent implements OnInit, OnDestroy {
+	contractReady = false;
+	contractReadyMsg = 'Getting FiddyFiddy ready...';
 	adminForm: FormGroup;
 	config: AppConfig;
 	configItemList: ConfigItem[];
