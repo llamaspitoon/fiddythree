@@ -49,14 +49,8 @@ export class AdminComponent implements OnInit, OnDestroy {
 	}
 
 	ngOnInit() {
-		this._contractService.getContract()
-			.then(() => {
-				this.setWeekNumbers();
-				this.getAppConfig();
-			})
-			.catch(() => {
-				this.contractReadyMsg = 'Ruh roh... FiddyFiddy failed.';
-			});
+		this.setWeekNumbers();
+		this.getAppConfig();
 	}
 
 	ngOnDestroy() {

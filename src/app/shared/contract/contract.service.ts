@@ -1,63 +1,82 @@
 import { GameType } from './../game-type/game-type';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Injectable } from '@angular/core';
+import { AppConfig } from '@app/shared/app-config/app-config';
+import { GameTypeData } from '../game-type/game-type';
+import { IWinningEntry } from '../picks/picks-entry';
 
 declare let require: any;
 declare let window: any;
 
 const Web3 = require('web3');
 const TruffleContract = require('@truffle/contract');
-
-import * as tokenAbi from '../../../../build/contracts/FiddyFiddy.json';
-import { AppConfig } from '@app/shared/app-config/app-config';
-import { GameTypeData } from '../game-type/game-type.js';
-import { IWinningEntry } from '../picks/picks-entry.js';
+const tokenAbi =  require('../../../../build/contracts/FiddyFiddy.json');
 
 @Injectable({
 	providedIn: 'root'
 })
 export class ContractService {
-	private _fiddyFiddy: any;
-	private _userAccount: string;
+	private web3: any;
+	private fiddyFiddy = TruffleContract(tokenAbi);
+	private userAccount: string;
 
-	constructor(private _snackBar: MatSnackBar) {
-		this._fiddyFiddy = TruffleContract(tokenAbi);
-	}
+	constructor(private snackBar: MatSnackBar) {}
 
-	getContract(): Promise<void> {
-		return new Promise((resolve, reject) => {
-			// If no web3 instance, then direct user to turn on or install MetaMask
-			if (typeof window.ethereum === 'undefined') {
-				window.web3 = new Web3(new Web3.providers.HttpProvider(`http://localhost:7545`));
-				this._userAccount = window.web3.eth.accounts[0];
+	resolveContract(): Promise<boolean> {
+		const thi$ = () => this;
 
-				this.displayError('You do not have an ethereum provider enabled. You could try MetaMask if you do not have a wallet provider.');
-				return resolve();
-			} else {
-				window.ethereum.enable(window.ethereum)
+		// Checking if Web3 has been injected by the browser (Mist/MetaMask)
+		if (typeof window.ethereum !== 'undefined') {
+			return new Promise((resolve, reject) => {
+				window.ethereum.enable()
 					.then(() => {
-						window.web3 = new Web3(window.ethereum);
-						this._userAccount = window.web3.eth.accounts[0];
-						return resolve();
+						thi$().web3 = new Web3(window.ethereum);
+						thi$().fiddyFiddy.setProvider(thi$().web3.currentProvider);
+						return thi$().fiddyFiddy.deployed();
+					})
+					.then((contract: any) => {
+						console.dir(contract);
+						return thi$().web3.eth.getAccounts();
+					})
+					.then((accounts: any[]) => {
+						thi$().userAccount = accounts[0];
+						return resolve(true);
 					})
 					.catch((error: any) => {
-						this.displayError('You cannot play if you do not allow FiddyFiddy to interact with your address.');
-						return reject();
+						return reject(error);
 					});
-			}
-		});
+			});
+		} else {
+			thi$().displayError('You do not have an ethereum provider enabled. You could try MetaMask if you do not have a wallet provider.');
+			// Hack to provide backwards compatibility for Truffle, which uses web3js 0.20.x
+			Web3.providers.HttpProvider.prototype.sendAsync = Web3.providers.HttpProvider.prototype.send;
+			// fallback - use your fallback strategy (local node / hosted node + in-dapp id mgmt / fail)
+			thi$().web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:7545'));
+
+			thi$().fiddyFiddy.setProvider(this.web3.currentProvider);
+
+			return new Promise((resolve, reject) => {
+				thi$().web3.eth.getAccounts()
+					.then((accounts: any[]) => {
+						thi$().userAccount = accounts[0];
+						return resolve(true);
+					})
+					.catch((error: any) => {
+						return reject(error);
+					});
+				});
+		}
 	}
 
 	getUserInfo(): Promise<{}> {
 		const thi$ = () => this;
-
 		return new Promise((resolve, reject) => {
-			thi$()._fiddyFiddy.deployed()
+			thi$().fiddyFiddy.deployed()
 				.then((instance: any) => {
-					return instance.getAdmissionStatus.call(thi$()._userAccount, { from: thi$()._userAccount });
+					return instance.getAdmissionStatus.call(thi$().userAccount, { from: thi$().userAccount });
 				})
 				.then((isAdmitted: boolean) => {
-					return resolve({ userAddress: thi$()._userAccount, isAdmitted });
+					return resolve({ userAddress: thi$().userAccount, isAdmitted });
 				})
 				.catch((error: any) => {
 					return reject(error);
@@ -70,21 +89,21 @@ export class ContractService {
 		let truffleContract: any;
 		let picksBytes: string;
 		return new Promise((resolve, reject) => {
-			thi$()._fiddyFiddy.deployed()
+			thi$().fiddyFiddy.deployed()
 				.then((instance: any) => {
 					truffleContract = instance;
 					const ticketPrice = window.web3.toWei(gameTypeData.etherValue, 'ether');
 					picksBytes = thi$().convertPicksToSha3(picks);
 					return truffleContract.admitAndPostPicks(weekNumber, picksBytes,
 						{
-							from: thi$()._userAccount,
+							from: thi$().userAccount,
 							value: ticketPrice
 						}
 					);
 				})
 				.then((transaction: any) => {
 					// Get the picks from the blockchain as a sanity check
-					return truffleContract.getWeeklyEntries.call(thi$()._userAccount, weekNumber, gameTypeData.gameType);
+					return truffleContract.getWeeklyEntries.call(thi$().userAccount, weekNumber, gameTypeData.gameType);
 				})
 				.then((storedPickSets: string[]) => {
 					const thisStoredPickSet: string = storedPickSets.find((set: string) => set === picksBytes);
@@ -115,19 +134,19 @@ export class ContractService {
 	setAppConfig(config: AppConfig): Promise<boolean> {
 		const thi$ = () => this;
 		return new Promise((resolve, reject) => {
-			thi$()._fiddyFiddy.deployed()
+			thi$().fiddyFiddy.deployed()
 				.then((instance: any) => {
-					if (config.admin !== thi$()._userAccount) {
+					if (config.admin !== thi$().userAccount) {
 						return reject('You are not the owner of FiddyFiddy and cannot access admin functions.');
 					}
 
-					const weekBigNumber: any = window.web3.toBigNumber(config.weekNumber);
+					// const weekBigNumber: any = window.web3.toBigNumber(config.weekNumber);
 					return instance.setConfig(
-						weekBigNumber /* weekNumber */,
+						config.weekNumber /* weekNumber */,
 						config.contractLocked,
 						config.stakeholder,
 						config.founder,
-						{ from: thi$()._userAccount }
+						{ from: thi$().userAccount }
 					);
 				})
 				.then((transaction: any) => {
@@ -146,7 +165,7 @@ export class ContractService {
 	getAppConfig(): Promise<AppConfig> {
 		const thi$ = () => this;
 		return new Promise((resolve, reject) => {
-			thi$()._fiddyFiddy.deployed()
+			thi$().fiddyFiddy.deployed()
 				.then((instance: any) => {
 					return instance.getConfig.call();
 				})
@@ -160,7 +179,7 @@ export class ContractService {
 					return resolve(appConfig);
 				})
 				.catch((error: any) => {
-					return reject(error);
+					reject(error);
 				});
 		});
 	}
@@ -168,7 +187,7 @@ export class ContractService {
 	addWinningEntry(winningEntry: IWinningEntry): Promise<boolean> {
 		const thi$ = () => this;
 		return new Promise((resolve, reject) => {
-			thi$()._fiddyFiddy.deployed()
+			thi$().fiddyFiddy.deployed()
 				.then((instance: any) => {
 					return instance.addWinningEntry(
 						winningEntry.weekNumber,
@@ -193,7 +212,7 @@ export class ContractService {
 	payoutWinnings(weekNumber: number, gameType: GameType): Promise<boolean> {
 		const thi$ = () => this;
 		return new Promise((resolve, reject) => {
-			thi$()._fiddyFiddy.deployed()
+			thi$().fiddyFiddy.deployed()
 				.then((instance: any) => {
 					return instance.payoutWinnings(weekNumber, gameType);
 				})
@@ -207,7 +226,7 @@ export class ContractService {
 	}
 
 	displayError(errorMsg: string): void {
-		this._snackBar.open(errorMsg, '', {
+		this.snackBar.open(errorMsg, '', {
 			duration: 5000,
 			panelClass: 'bg-danger'
 		});

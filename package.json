@@ -10,7 +10,7 @@
     "lint": "ng lint",
     "e2e": "ng e2e",
     "postinstall": "node patch.js",
-    "start-dev": "ng build --source-map && node ./server/bin/www",
+    "watch-client": "ng build --watch",
     "start-prod": "ng build --prod && node ./server/bin/www",
     "watch-server": "nodemon --inspect ./server/bin/www"
   },
