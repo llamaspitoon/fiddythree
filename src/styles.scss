@@ -1,2 +1,94 @@
 @import '~bootstrap/scss/bootstrap';
-@import "~@angular/material/prebuilt-themes/indigo-pink.css";
+@import '~@angular/material/prebuilt-themes/indigo-pink.css';
+
+$material-accent: #ff4081;
+
+.ff {
+
+	&-accent-icon {
+		color: $material-accent;
+	}
+
+	&-scores-input {
+		.mat-form-field-infix {
+			width: 48px;
+		}
+	}
+
+	&-correct-pick {
+		.mat-icon {
+			color: $green;
+
+			&::after {
+				content: 'done';
+			}
+		}
+	}
+
+	&-incorrect-pick {
+		.mat-icon {
+			color: $red;
+
+			&::after {
+				content: 'clear';
+			}
+		}
+	}
+
+	&-chosen-pick {
+		.mat-icon {
+			color: $material-accent;
+
+			&::after {
+				content: 'thumb_up_alt';
+			}
+		}
+	}
+
+	&-no-pick {
+		.mat-icon {
+			display: none;
+		}
+	}
+
+	&-winning-team {
+		& span {
+			font-weight: bold;
+		}
+    }
+
+    &-button-row {
+
+        button {
+            padding: 0 0.5rem;
+        }
+    }
+
+    &-game-type-toggle {
+        background: $material-accent;
+        color: #fff;
+
+        .mat-button-toggle {
+			background: inherit;
+            color: inherit;
+
+            button:focus {
+                outline: none;
+            }
+
+            &-checked {
+                background: rgba(0, 0, 0, 0.15);
+                color: rgba(0, 0, 0, 0.5);
+            }
+        }
+	}
+
+	&-game-type-group {
+		display: block;
+
+		&__item {
+			display: inline-block;
+			margin-right: 1rem;
+		}
+	}
+}

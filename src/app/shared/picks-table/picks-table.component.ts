@@ -2,6 +2,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { IGame } from '@app/shared/game/game';
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { FormGroup, FormBuilder, FormArray } from '@angular/forms';
+import { take } from 'rxjs/operators';
 
 @Component({
 	selector: 'app-picks-table',
@@ -16,7 +17,7 @@ export class PicksTableComponent implements OnInit {
 
 	constructor(
 		private _formBuilder: FormBuilder,
-		private _snackBar: MatSnackBar
+		private snackbar: MatSnackBar
 	) { }
 
 	ngOnInit() {
@@ -53,10 +54,14 @@ export class PicksTableComponent implements OnInit {
 	}
 
 	displayError(errorMsg: string): void {
-		this._snackBar.open(errorMsg, '', {
+		const snackbarRef = this.snackbar.open(errorMsg, 'Close', {
 			duration: 5000,
 			panelClass: 'bg-danger'
 		});
+
+		snackbarRef.onAction()
+			.pipe(take(1))
+			.subscribe(_ => snackbarRef.dismiss());
 	}
 
 }

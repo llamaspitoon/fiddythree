@@ -92,7 +92,7 @@ export class ContractService {
 			thi$().fiddyFiddy.deployed()
 				.then((instance: any) => {
 					truffleContract = instance;
-					const ticketPrice = window.web3.toWei(gameTypeData.etherValue, 'ether');
+					const ticketPrice = thi$().web3.utils.toWei(gameTypeData.etherValue, 'ether');
 					picksBytes = thi$().convertPicksToSha3(picks);
 					return truffleContract.admitAndPostPicks(weekNumber, picksBytes,
 						{
@@ -128,7 +128,7 @@ export class ContractService {
 				picksAsString += ' ';
 			}
 		});
-		return window.web3.sha3(picksAsString);
+		return this.web3.utils.soliditySha3(picksAsString);
 	}
 
 	setAppConfig(config: AppConfig): Promise<boolean> {
@@ -140,9 +140,8 @@ export class ContractService {
 						return reject('You are not the owner of FiddyFiddy and cannot access admin functions.');
 					}
 
-					// const weekBigNumber: any = window.web3.toBigNumber(config.weekNumber);
 					return instance.setConfig(
-						config.weekNumber /* weekNumber */,
+						config.weekNumber,
 						config.contractLocked,
 						config.stakeholder,
 						config.founder,

@@ -3,31 +3,6 @@ pragma solidity ^0.5.0;
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
-/********************
-    This is the FiddyFiddy contract for v1. It is rather centralized in that only the contract
-    owner (called admin here) can, and must, set several properties including some that must changed
-    once or twice per week:
-
-        1. Change the weekly schedule number. Do this after the previous week is finished and paid out.
-        2. The initial setting of the contract is unlocked. Lock the contract prior to Sunday's first
-           kickoff so that users cannot push entries after the games have started.
-        3. While the contract is locked, enter the final scores of the games. You can do this as the
-           games finish or in a single batch after Monday night's game concludes. The user experience
-           is better with the former since users can see how they are doing throughout the day, but it
-           requires the admin to enter scores several times in a timely manner as games conclude.
-        4. While the contract is locked, after all games conclude and all final scores have been saved,
-           set the master key, which is a perfect picks entry based on the final scores. Then run the
-           determine the winner function, which grabs all the picks entries and grades them against the
-           master key to determine the winner. Once this processing concludes, the winner(s) will appear
-           on the screen.
-
-    One of our two main goals is to completely decentralize FiddyFiddy such
-    that the admin functions can be triggered by timestamps and scores can be fed in via a third-party
-    API provider. Right now it is the contract owner's responsibility to create their own database
-    and populate the game schedule manually until a third-party API provider is secured, at which point
-    it is the contract owner's responsibility to activate an account with that provider.
- */
-
 contract FiddyFiddy is Ownable {
     using SafeMath for uint8;
     using SafeMath for uint256;
@@ -39,9 +14,8 @@ contract FiddyFiddy is Ownable {
     struct Config {
         uint8 weekNumber;
         bool contractLocked;
-        address admin;
-        address payable stakeholder;
-        address payable founder;
+        address stakeholder;
+        address founder;
     }
 
     struct GameType {
@@ -51,11 +25,10 @@ contract FiddyFiddy is Ownable {
 
     enum GameTypeName { SmallBuyIn, MediumBuyIn, LargeBuyIn }
     uint8 constant TOTAL_WEEKS = 21;
-    uint8 constant GAME_TYPE_COUNT = 3;
     uint256 constant SMALL_VALUE = 0.05 ether;
     uint256 constant MEDIUM_VALUE = 0.2 ether;
     uint256 constant LARGE_VALUE = 1 ether;
-    GameType[GAME_TYPE_COUNT] gameTypes; // 3-Tier buy-in levels
+    GameType[3] gameTypes; // 3-Tier buy-in levels
     Config private config; // Includes dependencies such as week # and contact lock status
 
     // weekNumber => gameType => player => picks[]
@@ -63,7 +36,7 @@ contract FiddyFiddy is Ownable {
     // weekNumber => gameType => player => winningPicks[]
     mapping(uint8 => mapping(uint8 => mapping(address => bytes32[]))) public winningEntries;
     // weekNumber => gameType => player[]
-    mapping(uint8 => mapping(uint8 => address payable[])) public winners;
+    mapping(uint8 => mapping(uint8 => address[])) public winners;
     // weekNumber => gameType => entriesCount
     mapping(uint8 => mapping(uint8 => uint256)) public entriesCount;
     // weekNumber => gameType => ether
@@ -74,10 +47,7 @@ contract FiddyFiddy is Ownable {
     // I applaud you on deploying and extending your own version of FiddyFiddy.
     // Give the creator of the game some love (1% of revenue) and leave my address uncommented.
     // TODO: Make this a constant
-    address payable constant initFounder = 0x020132905D3149597969aAD0DB186e601F0A6302;
-    // stakeholder is initialized to the founder address.
-    // If you spin your own, remember to change this by calling setStakeholder()
-    address payable constant initStakeholder = 0x020132905D3149597969aAD0DB186e601F0A6302;
+    address constant founder = 0x020132905D3149597969aAD0DB186e601F0A6302;
 
     /*****************************
      * 		   MODIFIERS  		 *
@@ -119,9 +89,9 @@ contract FiddyFiddy is Ownable {
      *****************************/
 
     constructor() public {
-        setConfig(1, true, initStakeholder, initFounder);
+        setConfig(1, true);
         initWeeklyValues();
-        initGameTypes();
+        initGameTypes(GAME_TYPE_COUNT);
     }
 
     /*****************************
@@ -137,7 +107,6 @@ contract FiddyFiddy is Ownable {
     }
 
     function initGameTypes() public onlyOwner() {
-        // 3-Tiered Buy-in levels
         gameTypes[0] = GameType({
             name: GameTypeName.SmallBuyIn,
             value: SMALL_VALUE
@@ -154,17 +123,12 @@ contract FiddyFiddy is Ownable {
 
 	function setConfig(
         uint8 _weekNumber,
-        bool _contractLocked,
-        address payable _stakeholder,
-        address payable _founder
+        bool _contractLocked
     )
         public
         onlyOwner()
     {
-        // Initially sets the stakeholder to the founder's address.
-        // If you spin your own, remember to change this by calling setStakeholder()
-        // TODO: remove founder param and hard-code into contract
-		config = Config(_weekNumber, _contractLocked, owner(), _stakeholder, _founder);
+		config = Config(_weekNumber, _contractLocked, owner(), founder);
 	}
 
 	function addWinningEntry(
@@ -201,24 +165,24 @@ contract FiddyFiddy is Ownable {
 
         require(thisGameTypePayout < address(this).balance, 'There is not enough ether to payout the winner, Ruh roh!');
         uint256 onePercentShare = thisGameTypePayout.div(100);
-        uint256 fourPercentShare = onePercentShare.mul(4);
-        uint256 ninetyFourPercentShare = onePercentShare.mul(94);
+        uint256 eightPercentShare = onePercentShare.mul(8);
+        uint256 ninetyPercentShare = onePercentShare.mul(90);
 
-        // 4% to the stakeholder
-		address payable stakeholder = config.stakeholder;
-        stakeholder.transfer(fourPercentShare);
+        // 8% to the stakeholder
+		address payable stakeholderPayable = payable(config.stakeholder);
+        stakeholderPayable.transfer(eightPercentShare);
         // 1% to the founder
-		address payable founder = config.founder;
-        founder.transfer(onePercentShare);
+		address payable founderPayable = payable(config.founder);
+        founderPayable.transfer(onePercentShare);
 
         // Get the winners
-        address payable[] storage thisWeeksWinners = winners[_weekNumber][_gameType];
+        address[] storage thisWeeksWinners = winners[_weekNumber][_gameType];
 
         // Determine the payout based on the number of winners and disperse the winnings
         uint256 winnersCount = thisWeeksWinners.length;
-        uint256 payout = ninetyFourPercentShare.div(winnersCount);
+        uint256 payout = ninetyPercentShare.div(winnersCount);
         for (uint256 i = 0; i < winnersCount; i++) {
-			address payable thisWinner = thisWeeksWinners[i];
+			address payable thisWinner = payable(thisWeeksWinners[i]);
             thisWinner.transfer(payout);
         }
 

@@ -1,1 +1,92 @@
-<p>view-entries works!</p>
+<div class="py-3">
+	<mat-card *ngIf="config">
+		<h4><span *ngIf="player">{{player}}<br></span>
+			Player Entries<span *ngIf="config.weekNumber">: Week {{config.weekNumber}}</span></h4>
+		<p>The bar below the opponents of each game illustrates the ratio of players who picked each team and the percentage of those picks is shown in italics. Before the games are played, your pick in each game has a thumbs up like <mat-icon color="accent">thumb_up_alt</mat-icon>. Once scores are posted, your pick will show a <span class="ff-correct-pick"><mat-icon></mat-icon></span> if you picked the winner and your pick will show a <span class="ff-incorrect-pick"><mat-icon></mat-icon></span> if you picked the loser. In the event of a tie, the correct/incorrect icon will show by the away team only.</p>
+		<div>
+			<p>Select a Game Type:</p>
+			<mat-radio-group
+				class="ff-game-type-group"
+				(change)="updateActiveGameType($event.value)">
+				<mat-radio-button
+					class="ff-game-type-group__item"
+					[value]="gameTypes.Fun"
+					[checked]="activeGameType === gameTypes.Fun">
+					Fun
+				</mat-radio-button>
+				<mat-radio-button
+					class="ff-game-type-group__item"
+					[value]="gameTypes.Funner"
+					[checked]="activeGameType === gameTypes.Funner">
+					Funner
+				</mat-radio-button>
+				<mat-radio-button
+					class="ff-game-type-group__item"
+					[value]="gameTypes.Baller"
+					[checked]="activeGameType === gameTypes.Baller">
+					Baller
+				</mat-radio-button>
+			</mat-radio-group>
+		</div>
+		<div *ngIf="activeEntry">
+			<div>
+				<p><b>Your Entries:</b></p>
+				<mat-radio-group class="d-flex flex-column"
+					(change)="updateActiveEntry($event.value)">
+					<mat-radio-button *ngFor="let entry of activeGameTypePlayerEntries"
+						[checked]="activeEntry._id === entry._id"
+						[value]="entry._id">
+						{{entry._id}}
+					</mat-radio-button>
+				</mat-radio-group>
+				<div *ngIf="activeEntry?.numberCorrect">
+					<p><b>Your Score:</b></p>
+					<p>
+						{{activeEntry.numberCorrect}} correct picks<br>
+						(<span *ngIf="activeEntryMondayScore - actualMondayScore > 0">+</span>
+						{{activeEntryMondayScore - actualMondayScore}} ) MNF score differential
+					</p>
+				</div>
+			</div>
+		</div>
+		<p><b>Games:</b></p>
+		<p>
+            <span class="ml-3">MNF Total Score: <b>{{actualMondayScore}}</b></span>
+            <ng-container *ngIf="activeEntry">
+                <span class="ml-3">Your Chosen Score: <b>{{activeEntryMondayScore}}</b></span>
+                &nbsp;
+                (<span *ngIf="activeEntryMondayScore - actualMondayScore > 0">+</span>
+                {{activeEntryMondayScore - actualMondayScore}} )
+            </ng-container>
+		</p>
+		<div *ngIf="games" class="row mt-2">
+			<div *ngFor="let game of games; let i=index"
+				class="col-md-6 mb-3">
+				<div class="row">
+					<div class="col-2">
+						<i class="mr-2">{{games[i].homeChosenPercentage}}%</i>
+					</div>
+					<div class="col-8 text-center">
+						<span [ngClass]="getTeamClass(i, 'away', games[i].away.team.team_id)">
+							<mat-icon></mat-icon>
+							<span>{{games[i].away.team.name}} {{games[i].away.score}}</span>
+						</span>
+						at
+						<span [ngClass]="getTeamClass(i, 'home', games[i].home.team.team_id)">
+							<span>{{games[i].home.team.name}} {{games[i].home.score}}</span>
+							<mat-icon></mat-icon>
+						</span>
+					</div>
+					<div class="col-2 text-right">
+						<i class="ml-2">{{100 - games[i].homeChosenPercentage}}%</i>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col">
+						<mat-progress-bar mode="determinate" [value]="games[i].homeChosenPercentage"></mat-progress-bar>
+					</div>
+				</div>
+			</div>
+		</div>
+	</mat-card>
+</div>
