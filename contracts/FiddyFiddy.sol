@@ -15,7 +15,6 @@ contract FiddyFiddy is Ownable {
         uint8 weekNumber;
         bool contractLocked;
         address stakeholder;
-        address founder;
     }
 
     struct GameType {
@@ -25,10 +24,11 @@ contract FiddyFiddy is Ownable {
 
     enum GameTypeName { SmallBuyIn, MediumBuyIn, LargeBuyIn }
     uint8 constant TOTAL_WEEKS = 21;
+	uint8 constant GAME_TYPE_COUNT = 3;
     uint256 constant SMALL_VALUE = 0.05 ether;
     uint256 constant MEDIUM_VALUE = 0.2 ether;
     uint256 constant LARGE_VALUE = 1 ether;
-    GameType[3] gameTypes; // 3-Tier buy-in levels
+    GameType[GAME_TYPE_COUNT] gameTypes; // 3-Tier buy-in levels
     Config private config; // Includes dependencies such as week # and contact lock status
 
     // weekNumber => gameType => player => picks[]
@@ -46,7 +46,6 @@ contract FiddyFiddy is Ownable {
 
     // I applaud you on deploying and extending your own version of FiddyFiddy.
     // Give the creator of the game some love (1% of revenue) and leave my address uncommented.
-    // TODO: Make this a constant
     address constant founder = 0x020132905D3149597969aAD0DB186e601F0A6302;
 
     /*****************************
@@ -128,13 +127,13 @@ contract FiddyFiddy is Ownable {
         public
         onlyOwner()
     {
-		config = Config(_weekNumber, _contractLocked, owner(), founder);
+		config = Config(_weekNumber, _contractLocked, owner());
 	}
 
 	function addWinningEntry(
         uint8 _weekNumber,
         uint8 _gameType,
-        address payable _winner,
+        address _winner,
         bytes32 _winningEntry
     )
         public
@@ -146,7 +145,7 @@ contract FiddyFiddy is Ownable {
         winningEntries[_weekNumber][_gameType][_winner] = existingWinningEntries;
 
         // add to the winners mapping also for when we pay out
-        address payable[] storage thisWeeksWinners = winners[_weekNumber][_gameType];
+        address[] storage thisWeeksWinners = winners[_weekNumber][_gameType];
         thisWeeksWinners.push(_winner);
         winners[_weekNumber][_gameType] = thisWeeksWinners;
         return true;
@@ -169,20 +168,20 @@ contract FiddyFiddy is Ownable {
         uint256 ninetyPercentShare = onePercentShare.mul(90);
 
         // 8% to the stakeholder
-		address payable stakeholderPayable = payable(config.stakeholder);
+		address stakeholderPayable = payable(config.stakeholder);
         stakeholderPayable.transfer(eightPercentShare);
         // 1% to the founder
-		address payable founderPayable = payable(config.founder);
+		address founderPayable = payable(founder);
         founderPayable.transfer(onePercentShare);
 
         // Get the winners
-        address[] storage thisWeeksWinners = winners[_weekNumber][_gameType];
+        address[] memory thisWeeksWinners = winners[_weekNumber][_gameType];
 
         // Determine the payout based on the number of winners and disperse the winnings
         uint256 winnersCount = thisWeeksWinners.length;
         uint256 payout = ninetyPercentShare.div(winnersCount);
         for (uint256 i = 0; i < winnersCount; i++) {
-			address payable thisWinner = payable(thisWeeksWinners[i]);
+			address payable thisWinner = address(thisWeeksWinners[i]);
             thisWinner.transfer(payout);
         }
 
@@ -202,14 +201,12 @@ contract FiddyFiddy is Ownable {
         uint8 o_weekNumber,
         bool o_contractLocked,
         address o_admin,
-        address o_stakeholder,
-        address o_founder
+        address o_stakeholder
     ) {
 		o_weekNumber = config.weekNumber;
 		o_contractLocked = config.contractLocked;
 		o_admin = config.admin;
         o_stakeholder = config.stakeholder;
-        o_founder = config.founder;
 	}
 
 	function getAdmissionStatus(address _player) public view returns(bool) {
