@@ -38,7 +38,7 @@
 		"http-errors": "^1.7.3",
 		"mongoose": "^5.8.9",
 		"morgan": "^1.9.1",
-		"node-sass": "^4.12.0",
+		"node-sass": "^7.0.0",
 		"nodemon": "^2.0.2",
 		"openzeppelin-solidity": "^2.4.0",
 		"rxjs": "^6.5.3",
